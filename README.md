@@ -1,1 +1,6 @@
-# simple-code-implement
+# 一些简单的代码实现
+
+## 1  快速幂算法（Exponentiation by squaring）
+
+​	一种简单而有效的小算法，它可以以O(log^n^ )的时间复杂度计算乘方。快速幂不仅本身非常常见，而且后续很多算法也都会用到快速幂。
+
