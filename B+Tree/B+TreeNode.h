@@ -270,7 +270,9 @@ int BPTnode<Ktype,Vtype>::insertPairintoNode(Ktype nodekey,BPTnode<Ktype,Vtype> 
     e.BPTnodeEntry = nodeEntry;
     entries->insert(itentry,e);
     keynum++;
-    
+    if(i==0){
+        setMinDirty();
+    }
     return i;
 }
 
@@ -291,6 +293,9 @@ int BPTnode<Ktype,Vtype>::insertPairintoNode(Ktype dataKey,Vtype * dataEntry){
     e.BPTdataEntry = dataEntry;
     entries->insert(itentry,e);
     keynum++;
+    if(i==0){
+        setMinDirty();
+    }
     return i;
 }
 
@@ -309,7 +314,9 @@ int BPTnode<Ktype,Vtype>::insertPairintoNode(Ktype dataKey,entry<BPTnode<Ktype,V
     keys->insert(itkeys,dataKey); 
     entries->insert(itentry,Entry);
     keynum++;
-    
+    if(i==0){
+        setMinDirty();
+    }
     return i;
 }
 

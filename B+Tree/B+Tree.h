@@ -44,7 +44,7 @@ template<typename Ktype, typename Vtype>
 bool BPT<Ktype,Vtype>::insertPair(Ktype key,Vtype * data){
     BPTnode<Ktype,Vtype> * leafLocate = findLeaf(key, data);
     int changedindex = leafLocate->insertPairintoNode(key,data);
-    
+    maintainMinEntry(leafLocate);
     checkUp(leafLocate);
 }
 
@@ -66,8 +66,6 @@ void BPT<Ktype,Vtype>::maintainMinEntry(BPTnode<Ktype,Vtype> * nowNode){
             nowNode->refreshMinDirty();
             break;
         }
-        
-
         if(nowNode->isMinDirty()){
             BPTnode<Ktype,Vtype> * parentNode  = nowNode->getParentEntry();
             parentNode.deletePairfromNode(nowNode->getMinKey(),nowNode);
@@ -80,7 +78,6 @@ void BPT<Ktype,Vtype>::maintainMinEntry(BPTnode<Ktype,Vtype> * nowNode){
             break;
         }
     }
-    
 }
 
 
@@ -110,7 +107,7 @@ void BPT<Ktype,Vtype>::devideNode(BPTnode<Ktype,Vtype> * nowNode){
 
             rootNode->insertPairintoNode(nowNode->getMinKey(),nowNode);
             rootNode->insertPairintoNode(newNode->getMinKey(),newNode);
-
+            maintainMinEntry(rootNode);
             root = rootNode;
             nowNode = rootNode;
 
@@ -126,10 +123,12 @@ void BPT<Ktype,Vtype>::devideNode(BPTnode<Ktype,Vtype> * nowNode){
             nowNode->devideRightIntoNode(newNode);
 
             parentNode->insertPairintoNode(newNode->getMinKey(),newNode);
-            
+            //节点最小值一定不会改变,所以不用调用maintainMinEntry()
+
             nowNode = parentNode;
         }
     }
+    
 }
 
 template<typename Ktype, typename Vtype>
