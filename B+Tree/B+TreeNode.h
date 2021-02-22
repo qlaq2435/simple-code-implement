@@ -41,10 +41,15 @@ class BPTnode{
         void refreshMinDirty();
         void updateMinKeyandEntry();
         
+        BPTnode<Ktype,Vtype> * getMatchEntryForInsert(Ktype kkk);
 
         BPTnode<Ktype,Vtype> * getParentEntry();//获得当前节点的父节点指针
         BPTnode<Ktype,Vtype> * getLeftEntry();//获得当前节点的左兄弟指针
         BPTnode<Ktype,Vtype> * getRightEntry();//获得当前节点的右兄弟指针
+
+        std::vector<void *> getEntries();
+        std::vector<Ktype> getKeys();
+
         void setParentEntry(BPTnode<Ktype,Vtype> * parentEntry);//设置当前节点的父节点
         void setLeftEntry(BPTnode<Ktype,Vtype> * leftEntry);//设置当前节点的左兄弟
         void setRightEntry(BPTnode<Ktype,Vtype> * rightEntry);//设置当前节点的右兄弟
@@ -110,7 +115,7 @@ BPTnode<Ktype,Vtype>::BPTnode(int msize,int thres,bool leaf,bool root)
     inBPT(false),minDirty(false)
 {
     keys = new std::vector<Ktype>();
-    entries = new std::vector<entry<Ktype,Vtype>,Vtype>();
+    entries = new std::vector<entry<BPTnode<Ktype,Vtype>,Vtype>>();
 }
 
 template<typename Ktype, typename Vtype>
@@ -121,7 +126,12 @@ BPTnode<Ktype,Vtype>::BPTnode(int msize,int thres,bool leaf,bool root, BPTnode<K
     inBPT(false),minDirty(false)
 {
     keys = new std::vector<Ktype>();
-    entries = new std::vector<entry<Ktype,Vtype>,Vtype>();
+    entries = new std::vector<entry<BPTnode<Ktype,Vtype>,Vtype>>();
+}
+
+template<typename Ktype, typename Vtype>
+BPTnode<Ktype,Vtype>::~BPTnode(){
+    
 }
 
 template<typename Ktype, typename Vtype>
@@ -206,6 +216,28 @@ Ktype BPTnode<Ktype,Vtype>::getFirstKey(){
 }
         
 template<typename Ktype, typename Vtype>
+std::vector<void *> BPTnode<Ktype,Vtype>::getEntries(){
+    //typename std::vector<Ktype>::iterator itkeys;
+    std::vector<void*> v;
+    typename std::vector<entry<BPTnode<Ktype,Vtype>,Vtype>>::iterator itentry;
+    //std::cout<<this<<"aaa"<<std::endl;
+    for(itentry = entries->begin();
+        itentry!=entries->end();
+        itentry++)
+    {
+        Vtype * aaa = (*itentry).BPTdataEntry;
+        v.push_back(reinterpret_cast<void *>(aaa));
+    }
+    return v;
+}
+
+template<typename Ktype, typename Vtype>
+Ktype BPTnode<Ktype,Vtype>::getMinKey(){
+    return minKey;
+}
+
+
+template<typename Ktype, typename Vtype>
 entry<BPTnode<Ktype,Vtype>,Vtype> BPTnode<Ktype,Vtype>::getFirstEntry(){
     return entries->front();
 }
@@ -217,6 +249,30 @@ void BPTnode<Ktype,Vtype>::updateMinKeyandEntry(){
     return ;
 }
 
+template<typename Ktype, typename Vtype>
+BPTnode<Ktype,Vtype> * BPTnode<Ktype,Vtype>::getMatchEntryForInsert(Ktype kkk){
+    typename std::vector<Ktype>::iterator itkeys;
+    typename std::vector<entry<BPTnode<Ktype,Vtype>,Vtype>>::iterator itentry;
+    int i = 0;
+    bool flag =false;
+    for(itkeys = keys->begin(),itentry = entries->begin(),i=0;
+        itkeys!=keys->end()&&itentry!=entries->end();
+        itkeys++,itentry++,i++)
+    {
+        if(*itkeys>kkk) 
+            break;
+    }
+    std::cout<<*itkeys<<" ggg "<<kkk<<std::endl;
+    if(itkeys>keys->begin()){
+        itkeys--;
+        itentry--;
+        std::cout<<" ggg "<<std::endl;
+    }
+    
+    entry<BPTnode<Ktype,Vtype>,Vtype> e = *itentry;
+    std::cout<<*itkeys<<" "<<e.BPTnodeEntry <<std::endl;
+    return e.BPTnodeEntry;
+}
 
 
 template<typename Ktype, typename Vtype>
@@ -380,7 +436,7 @@ int BPTnode<Ktype,Vtype>::deletePairfromNode(Ktype dataKey,Vtype * dataEntry){
 
 template<typename Ktype, typename Vtype>  
 bool BPTnode<Ktype,Vtype>::mergeIntoNode(BPTnode<Ktype,Vtype> * desNode){
-
+    return true;
 }
 
 template<typename Ktype, typename Vtype>  
@@ -396,21 +452,27 @@ bool BPTnode<Ktype,Vtype>::devideRightIntoNode(BPTnode<Ktype,Vtype> * desNode){
 
     itkeys = keys->begin() + (keynum>>1);
     itentry = entries->begin()+(keynum>>1);
-    while (itkeys!=keys.end() && itentry!=entries.end()){
-        itkeys=keys.erase(itkeys);
-        itentry = entries.erase(itentry);
+    while (itkeys!=keys->end() && itentry!=entries->end()){
+        itkeys=keys->erase(itkeys);
+        itentry = entries->erase(itentry);
+        keynum--;
    }
+   return true;
 }
 
 template<typename Ktype, typename Vtype>        
 void BPTnode<Ktype,Vtype>::printNode(){
     typename std::vector<Ktype>::iterator itkeys;
     typename std::vector<entry<BPTnode<Ktype,Vtype>,Vtype>>::iterator itentry;
+    std::cout<<"this::>"<<this<<std::endl;
+    std::cout<<"minikey::>"<<minKey<<std::endl;
+    std::cout<<"isDirty::>"<<minDirty<<std::endl;
     for(itkeys = keys->begin(),itentry = entries->begin();
         itkeys!=keys->end()&&itentry!=entries->end();
         itkeys++,itentry++)
     {
-        std::cout<<*itkeys<<" ";
+        Vtype * aaa = (*itentry).BPTdataEntry;
+        std::cout<<*itkeys<<" "<<reinterpret_cast<void *>(aaa)<<" ";
     }
     std::cout<<std::endl;
 }

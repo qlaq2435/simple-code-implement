@@ -1,5 +1,6 @@
 #include"B+TreeNode.h"
 #include<vector>
+#include<queue>
 
 template<typename Ktype, typename Vtype>
 class BPT{
@@ -11,7 +12,7 @@ class BPT{
         bool deletePair(Ktype key,Vtype * data);
         bool openScan();
         Vtype * getNextEntry();
-        
+        void printBPT();
     
     private: 
         BPTnode<Ktype,Vtype> * root;
@@ -46,6 +47,7 @@ bool BPT<Ktype,Vtype>::insertPair(Ktype key,Vtype * data){
     int changedindex = leafLocate->insertPairintoNode(key,data);
     maintainMinEntry(leafLocate);
     checkUp(leafLocate);
+    return true;
 }
 
 template<typename Ktype, typename Vtype>
@@ -54,6 +56,7 @@ bool BPT<Ktype,Vtype>::deletePair(Ktype key,Vtype * data){
     int changedindex = leafLocate->deletePairfromNode(key,data);
     maintainMinEntry(leafLocate);
     checkUp(leafLocate);
+    return true;
 }
 
 template<typename Ktype, typename Vtype>
@@ -68,7 +71,7 @@ void BPT<Ktype,Vtype>::maintainMinEntry(BPTnode<Ktype,Vtype> * nowNode){
         }
         if(nowNode->isMinDirty()){
             BPTnode<Ktype,Vtype> * parentNode  = nowNode->getParentEntry();
-            parentNode.deletePairfromNode(nowNode->getMinKey(),nowNode);
+            parentNode->deletePairfromNode(nowNode->getMinKey(),nowNode);
             nowNode->updateMinKeyandEntry();
             nowNode->refreshMinDirty();
             parentNode->insertPairintoNode(nowNode->getMinKey(),nowNode);
@@ -86,9 +89,10 @@ bool BPT<Ktype,Vtype>::checkUp(BPTnode<Ktype,Vtype> * nowNode){
     if(nowNode->isOverflow()){
         devideNode(nowNode);
     }
-    else if(nowNode->isUnderflow){
+    else if(nowNode->isUnderflow()){
         mergeNode(nowNode);
     }
+    return true;
 }
 
 template<typename Ktype, typename Vtype>
@@ -104,7 +108,8 @@ void BPT<Ktype,Vtype>::devideNode(BPTnode<Ktype,Vtype> * nowNode){
                                                                         nowNode,nowNode->getRightEntry(),rootNode);
             nowNode->setRightEntry(newNode);
             nowNode->devideRightIntoNode(newNode);
-
+            newNode->updateMinKeyandEntry();
+            newNode->refreshMinDirty();
             rootNode->insertPairintoNode(nowNode->getMinKey(),nowNode);
             rootNode->insertPairintoNode(newNode->getMinKey(),newNode);
             maintainMinEntry(rootNode);
@@ -121,17 +126,50 @@ void BPT<Ktype,Vtype>::devideNode(BPTnode<Ktype,Vtype> * nowNode){
                                                                         nowNode,nowNode->getRightEntry(),parentNode);
             nowNode->setRightEntry(newNode);
             nowNode->devideRightIntoNode(newNode);
-
+            newNode->updateMinKeyandEntry();
+            newNode->refreshMinDirty();
             parentNode->insertPairintoNode(newNode->getMinKey(),newNode);
             //节点最小值一定不会改变,所以不用调用maintainMinEntry()
 
             nowNode = parentNode;
         }
     }
-    
+
 }
 
 template<typename Ktype, typename Vtype>
 void BPT<Ktype,Vtype>::mergeNode(BPTnode<Ktype,Vtype> * nowNode){
     
 }
+
+template<typename Ktype, typename Vtype>
+BPTnode<Ktype,Vtype> * BPT<Ktype,Vtype>::findLeaf(Ktype key,Vtype * data){
+    BPTnode<Ktype,Vtype> * nowNode = root;
+    while(nowNode->isleaf()!=true){
+        nowNode = root->getMatchEntryForInsert(key);
+    }
+    std::cout<<"leaf entry ::"<<nowNode<<std::endl;
+    return nowNode;
+}
+
+
+template<typename Ktype, typename Vtype>
+void BPT<Ktype,Vtype>::printBPT(){
+
+    std::queue<BPTnode<Ktype,Vtype>*> q;
+    q.push(root);
+    while(!q.empty()){
+        BPTnode<Ktype,Vtype>* n = q.front();
+        q.pop();
+        n->printNode();
+        if(n->isleaf()){
+            continue;
+        }
+        std::vector<void *> v = n->getEntries();
+        for(int i =0 ; i < v.size(); i++){
+            BPTnode<Ktype,Vtype> * k = (BPTnode<Ktype,Vtype> *)v[i];
+            q.push(k);
+        } 
+    }
+}
+

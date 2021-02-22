@@ -1,11 +1,25 @@
-#include"B+TreeNode.h"
+#include"B+Tree.h"
 #include<iostream>
 
 int main(){
-    BPTnode<int,int> aa(2,3);
-    int b = 2;
-    std::cout<<1111<<std::endl;
+    
+    int aaa[20];
+    for (int i = 0; i < 20; i++){
+        aaa[i] = i*i %11;
+        std::cout<<aaa[i]<<" ";
+    }
+    std::cout<<std::endl<<std::endl;
+    
+    BPT<int,int> t(5);
 
-    std::cout<<1111<<std::endl;
+    for(int i = 0;i<8;i++){
+        std::cout<<aaa[i]<<std::endl;
+        t.insertPair(aaa[i],aaa+i);
+        t.printBPT();
+        std::cout<<"-----------"<<std::endl;
+    }
+
+
+
     return 0;
 }
